@@ -37,17 +37,17 @@ Pasos: - Seleccionar usuario `totem1` - Desactivar opción:\
 
 Crear carpeta:
 
-C:`\ProgramData`{=tex}`\kiosk`{=tex}\
+C:`\ProgramData\kiosk`
 
 Crear archivo:
 
-C:`\ProgramData`{=tex}`\kiosk`{=tex}`\kiosk`{=tex}.bat
+C:`\ProgramData\kiosk\kiosk.bat`
 
 Contenido:
 
 @echo off taskkill /IM msedge.exe /F \>nul 2\>&1 timeout /t 1 \>nul
-start "" "C:`\Program `{=tex}Files
-(x86)`\Microsoft`{=tex}`\Edge`{=tex}`\Application`{=tex}`\msedge`{=tex}.exe"
+start "" "C:\Program Files
+(x86)\Microsoft\Edge\Application\msedge.exe"
 --kiosk https://totem-boletos-la.netlify.app
 --edge-kiosk-type=fullscreen --no-first-run --disable-infobars
 --kiosk-printing
@@ -62,7 +62,7 @@ Win + R → shell:startup
 
 Agregar acceso directo a:
 
-C:`\ProgramData`{=tex}`\kiosk`{=tex}`\kiosk`{=tex}.bat
+C:`\ProgramData\kiosk\kiosk.bat`
 
 ------------------------------------------------------------------------
 
