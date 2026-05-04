@@ -1,26 +1,29 @@
-# Kiosco Windows 10 (sin Acceso Asignado) -- Configuración completa
+# 🖥️ Kiosco en Windows 10 con Google Chrome (sin Assigned Access)
 
-Configuración de tótem en Windows 10 usando auto-login +
-`shell:startup` + script `.bat` + Microsoft Edge en modo kiosco.
+Configuración completa de un tótem usando:
+- Auto-login
+- Reemplazo de shell
+- Google Chrome en modo kiosco
+- Script .bat con restricciones de sistema
 
-------------------------------------------------------------------------
+---
 
 # 🧭 Objetivo
 
--   Inicio automático de usuario `totem1`
--   Apertura automática de Microsoft Edge en modo kiosco
--   Sin acceso al escritorio funcional
--   Impresión directa sin diálogo
--   Bloqueo de gestos laterales y atajos del sistema
+- Inicio automático con usuario `totem1`
+- Lanzamiento directo de Chrome en modo kiosco
+- Sin acceso funcional al escritorio
+- Restricciones básicas del sistema
+- Experiencia controlada tipo kiosco
 
-------------------------------------------------------------------------
+---
 
 # 1. Crear usuario kiosco
 
--   Usuario: `totem1`
--   Tipo: usuario estándar (no administrador)
+- Usuario: `totem1`
+- Tipo: usuario estándar (NO administrador)
 
-------------------------------------------------------------------------
+---
 
 # 2. Configurar auto-login
 
@@ -28,122 +31,98 @@ Ejecutar:
 
 Win + R → netplwiz
 
-Pasos: - Seleccionar usuario `totem1` - Desactivar opción:\
-"Los usuarios deben escribir su nombre y contraseña"
+Pasos:
 
-------------------------------------------------------------------------
+- Seleccionar usuario `totem1`
+- Desmarcar:
+  Los usuarios deben escribir su nombre y contraseña
 
-# 3. Script de inicio (.bat)
+---
 
-Crear carpeta:
+# 3. Crear carpeta de kiosco
 
-C:`\ProgramData\kiosk`
+C:\ProgramData\kiosk
+
+---
+
+# 4. Script principal (Chrome en modo kiosco)
 
 Crear archivo:
 
-C:`\ProgramData\kiosk\kiosk.bat`
+C:\ProgramData\kiosk\shell.bat
 
 Contenido:
 
-@echo off taskkill /IM msedge.exe /F \>nul 2\>&1 timeout /t 1 \>nul
-start "" "C:\Program Files
-(x86)\Microsoft\Edge\Application\msedge.exe"
---kiosk https://totem-boletos-la.netlify.app
---edge-kiosk-type=fullscreen --no-first-run --disable-infobars
---kiosk-printing
+@echo off
+taskkill /IM chrome.exe /F >nul 2>&1
+timeout /t 1 >nul
+start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk https://totem-boletos-la.netlify.app --no-first-run --disable-infobars --disable-session-crashed-bubble --overscroll-history-navigation=0 --disable-pinch --kiosk-printing
 
-------------------------------------------------------------------------
+---
 
-# 4. Inicio automático (shell:startup)
+# 5. Reemplazar shell por el script
 
-Iniciar sesión como `totem1`:
+Abrir regedit:
 
-Win + R → shell:startup
+HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Winlogon
 
-Agregar acceso directo a:
+Crear/modificar:
 
-C:`\ProgramData\kiosk\kiosk.bat`
+Shell = C:\ProgramData\kiosk\shell.bat
 
-------------------------------------------------------------------------
+---
 
-# 5. Políticas de bloqueo (GPO)
+# 6. Script de restricciones del sistema
 
-Aplicar a usuario `totem1`.
+Crear archivo:
 
-## 5.1 Desactivar teclas de Windows
+C:\ProgramData\kiosk\setup_kiosk.bat
 
-Ruta:
+Ejecutar como administrador
 
-Configuración de usuario → Plantillas administrativas → Explorador de
-archivos
+Contenido:
 
-Política: - Desactivar teclas de método abreviado de Windows
+@echo off
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer" /f
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\EdgeUI" /f
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System" /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoWinKeys /t REG_DWORD /d 1 /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoRun /t REG_DWORD /d 1 /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableTaskMgr /t REG_DWORD /d 1 /f
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\EdgeUI" /v AllowEdgeSwipe /t REG_DWORD /d 0 /f
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v DisableWebSearch /t REG_DWORD /d 1 /f
 
-------------------------------------------------------------------------
+---
 
-## 5.2 Desactivar Administrador de tareas
+# 7. Aplicar restricciones al usuario correcto
 
-Configuración de usuario → Sistema → Ctrl+Alt+Supr
+- Iniciar sesión como `totem1`
+- Ejecutar nuevamente el script si es necesario
 
-Política: - Quitar Administrador de tareas
+---
 
-------------------------------------------------------------------------
+# 8. Reiniciar sistema
 
-## 5.3 Quitar Ejecutar
+shutdown /r /t 0
 
-Menú Inicio y barra de tareas
-
-Política: - Quitar menú Ejecutar
-
-------------------------------------------------------------------------
-
-# 6. Bloqueo de deslizamiento lateral
-
-Ruta:
-
-Configuración del equipo → Plantillas administrativas → Componentes de
-Windows → Interfaz de usuario perimetral
-
-Política: - Permitir deslizamientos desde el borde → Deshabilitada
-
-------------------------------------------------------------------------
-
-# 7. Barra de tareas
-
-En sesión `totem1`:
-
--   Activar:
-    -   Ocultar automáticamente la barra de tareas
-
-------------------------------------------------------------------------
+---
 
 # ⚙️ Flujo de inicio
 
-1.  Windows inicia\
-2.  Auto-login en `totem1`\
-3.  Explorer carga brevemente\
-4.  `shell:startup` ejecuta `kiosk.bat`\
-5.  Edge se cierra/reinicia si es necesario\
-6.  Edge abre en modo kiosco\
-7.  Sistema queda bloqueado en la aplicación web
+Inicio Windows → Auto-login → shell.bat → Chrome kiosco
 
-------------------------------------------------------------------------
+---
 
 # ⚠️ Limitaciones
 
--   Puede existir un flash inicial del escritorio\
--   No es un kiosco embebido real tipo sistema dedicado\
--   Depende de estabilidad de Microsoft Edge\
--   Si Edge falla, el sistema queda sin interfaz funcional
+- Puede haber un flash inicial
+- Ctrl + Alt + Supr no se puede eliminar
+- Algunas restricciones dependen del hardware
 
-------------------------------------------------------------------------
+---
 
 # 🧠 Conclusión
 
-Este enfoque:
-
--   No usa Acceso Asignado\
--   Permite control total del navegador\
--   Habilita impresión directa (`--kiosk-printing`)\
--   Reduce interacción del sistema operativo\
--   Es adecuado para tótems funcionales de producción básica
+Configuración flexible de kiosco sin Assigned Access, con control de navegador e impresión silenciosa.
