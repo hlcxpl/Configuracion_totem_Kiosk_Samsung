@@ -37,6 +37,25 @@ Pasos:
 - Desmarcar:
   Los usuarios deben escribir su nombre y contraseña
 
+## ⚠️ Problema común: no aparece la opción a desmarcar en netplwiz
+
+### Solución por registro:
+
+1. Win + R → `regedit`
+
+2. Ir a:
+
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device
+
+
+3. Cambiar:
+
+DevicePasswordLessBuildVersion = 0
+
+
+4. Reiniciar o cerrar sesión
+
+👉 Luego `netplwiz` vuelve a mostrar la opción
 ---
 
 # 3. Crear carpeta de kiosco
