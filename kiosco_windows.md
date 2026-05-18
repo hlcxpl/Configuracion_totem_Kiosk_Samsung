@@ -1,158 +1,339 @@
-# 🖥️ Modo Kiosco en Windows 10 con Google Chrome (sin Assigned Access)
+# 🖥️ Windows 10 Kiosco con Google Chrome (sin Assigned Access)
 
-Configuración completa de un tótem usando:
+Configuración de kiosco básico usando:
+
 - Auto-login
 - Reemplazo de shell
 - Google Chrome en modo kiosco
-- Script .bat con restricciones de sistema
+- Restricciones básicas
+- Reinicio automático del navegador
 
 ---
 
 # 🧭 Objetivo
 
-- Inicio automático con usuario `totem1`
-- Lanzamiento directo de Chrome en modo kiosco
-- Sin acceso funcional al escritorio
-- Restricciones básicas del sistema
-- Experiencia controlada tipo kiosco
+El objetivo de esta configuración es:
+
+- realizar login automático con el usuario `totem1`
+- abrir Chrome directamente en modo kiosco
+- ocultar el escritorio tradicional
+- reiniciar Chrome automáticamente si se cierra
+- aplicar restricciones básicas del sistema
 
 ---
 
 # 1. Crear usuario kiosco
 
-- Configuración > Cuentas > Familia y otros usuarios y seleccionar "Agregar otra persona a este equipo"
+Ir a:
+
+Configuración → Cuentas → Familia y otros usuarios → Agregar otra persona a este equipo
+
+Crear:
+
 - Usuario: `totem1`
-- Tipo: usuario estándar (NO administrador)
+- Tipo: Usuario estándar (NO administrador)
 
 ---
 
 # 2. Configurar auto-login
 
--Ejecutar:
+Abrir:
 
-Win + R → netplwiz
+Win + R → `netplwiz`
 
 Pasos:
 
-- Seleccionar usuario `totem1`
-- Desmarcar:
-  Los usuarios deben escribir su nombre y contraseña
+1. Seleccionar usuario `totem1`
+2. Desmarcar:
 
-## ⚠️ Problema común: no aparece la opción a desmarcar en netplwiz
+```text
+Los usuarios deben escribir su nombre y contraseña para usar el equipo
+```
 
-### Solución por registro:
+3. Aplicar
+4. Ingresar contraseña del usuario
 
-1. Win + R → `regedit`
+---
 
-2. Ir a:
+# ⚠️ Si la opción no aparece en netplwiz
 
+Algunas versiones de Windows ocultan la opción.
+
+## Solución
+
+Abrir:
+
+Win + R → `regedit`
+
+Ir a:
+
+```text
 HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device
+```
 
+Modificar:
 
-3. Cambiar:
-
+```text
 DevicePasswordLessBuildVersion = 0
+```
 
+Luego:
 
-4. Reiniciar o cerrar sesión
+- reiniciar
+o
+- cerrar sesión
 
-👉 Luego `netplwiz` vuelve a mostrar la opción
 ---
 
 # 3. Crear carpeta de kiosco
 
--Ingresar como `totem1`
+Iniciar sesión como `totem1`
 
--Crear carpeta:
+Crear:
 
+```text
 C:\ProgramData\kiosk
+```
 
 ---
 
-# 4. Script principal (Chrome en modo kiosco)
+# 4. Crear script principal del kiosco
 
--Crear archivo:
+Crear archivo:
 
+```text
 C:\ProgramData\kiosk\shell.bat
+```
 
--Contenido:
+Contenido:
 
+```bat
 @echo off
+
+:loop
+
 taskkill /IM chrome.exe /F >nul 2>&1
+
 timeout /t 1 >nul
-start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk https://totem-boletos-la.netlify.app --no-first-run --disable-infobars --disable-session-crashed-bubble --overscroll-history-navigation=0 --disable-pinch --kiosk-printing
+
+start /wait "" "C:\Program Files\Google\Chrome\Application\chrome.exe" ^
+--kiosk https://totem-boletos-la.netlify.app ^
+--no-first-run ^
+--disable-session-crashed-bubble ^
+--overscroll-history-navigation=0 ^
+--disable-pinch ^
+--kiosk-printing
+
+timeout /t 2 >nul
+
+goto loop
+```
 
 ---
 
-# 5. Reemplazar shell por el script
+# 🧠 Función del script
 
-Win + R, escribir `regedit`
+El script:
 
-Ir a: HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Winlogon
+- elimina instancias previas de Chrome
+- abre Chrome en modo kiosco
+- espera hasta que Chrome se cierre
+- reinicia Chrome automáticamente
 
--Clic derecho en un espacio vacío del panel derecho
+Esto ayuda a evitar:
 
--Nuevo
+- pantalla negra
+- cierre accidental del kiosco
+- sesiones inactivas tras cerrar Chrome
 
--Valor de cadena
+---
 
--Nombre exacto: Shell
+# 5. Configurar reemplazo de shell
 
--Doble clic sobre Shell
+## ⚠️ Importante
 
--En “Información del valor” escribir:
+NO modificar:
 
+```text
+HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
+```
+
+sin comprender completamente el impacto.
+
+Modificar `HKLM` afecta TODOS los usuarios del sistema.
+
+---
+
+## Método recomendado (por usuario)
+
+Iniciar sesión como:
+
+```text
+totem1
+```
+
+Abrir:
+
+Win + R → `regedit`
+
+Ir a:
+
+```text
+HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Winlogon
+```
+
+---
+
+## Si la clave `Winlogon` no existe
+
+Crear:
+
+- clic derecho sobre `CurrentVersion`
+- Nuevo
+- Clave
+- Nombre:
+
+```text
+Winlogon
+```
+
+---
+
+## Crear valor Shell
+
+Dentro de `Winlogon`:
+
+- clic derecho en panel derecho
+- Nuevo
+- Valor de cadena
+
+Nombre exacto:
+
+```text
+Shell
+```
+
+Valor:
+
+```text
 C:\ProgramData\kiosk\shell.bat
-
--Luego aceptar
+```
 
 ---
 
-# 6. Script de restricciones del sistema
+# 6. Crear script de restricciones
 
--Crear archivo:
+Crear archivo:
 
+```text
 C:\ProgramData\kiosk\setup_kiosk.bat
+```
 
--Contenido:
+Contenido:
 
+```bat
 @echo off
-reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer" /f
-reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\EdgeUI" /f
-reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /f
+
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /f
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System" /f
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\EdgeUI" /f
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /f
+
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoWinKeys /t REG_DWORD /d 1 /f
+
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoRun /t REG_DWORD /d 1 /f
+
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableTaskMgr /t REG_DWORD /d 1 /f
+
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\EdgeUI" /v AllowEdgeSwipe /t REG_DWORD /d 0 /f
+
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v DisableWebSearch /t REG_DWORD /d 1 /f
+```
 
+Ejecutar:
 
--Luego ejecutar como administrador
+- clic derecho
+- Ejecutar como administrador
 
 ---
 
 # 7. Reiniciar sistema
 
+Ejecutar:
+
+```cmd
 shutdown /r /t 0
+```
 
 ---
 
-# ⚙️ Flujo de inicio
+# 🔄 Flujo de inicio
 
-Inicio Windows → Auto-login → shell.bat → Chrome kiosco
-
----
-
-# ⚠️ Limitaciones
-
-- Puede haber un flash inicial
-- Ctrl + Alt + Supr no se puede eliminar
-- Algunas restricciones dependen del hardware
+```text
+Windows → Auto-login → shell.bat → Chrome kiosco
+```
 
 ---
 
-# 🧠 Conclusión
+# 🔧 Recuperación de emergencia
 
-Configuración flexible de kiosco sin Assigned Access, con control de navegador e impresión silenciosa.
+Si el kiosco falla y aparece:
+
+- pantalla negra
+- login roto
+- Chrome no inicia
+
+Abrir administrador de tareas:
+
+```text
+Ctrl + Alt + Supr
+```
+
+Luego:
+
+Archivo → Ejecutar nueva tarea
+
+Ejecutar:
+
+```text
+regedit
+```
+
+Ir a:
+
+```text
+HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Winlogon
+```
+
+Modificar:
+
+```text
+Shell = explorer.exe
+```
+
+Cerrar sesión o reiniciar.
+
+---
+
+# ⚠️ Limitaciones reales
+
+Esta configuración NO bloquea completamente:
+
+- Ctrl + Alt + Supr
+- Alt + Tab
+- algunas teclas Windows
+- accesibilidad
+- diálogos del sistema
+- herramientas administrativas
+- posibles escapes desde Chrome
+
+---
+
+# ✅ Conclusión
+
+Esta configuración resulta adecuada para:
+
+- tótems simples
+- kioscos informativos
+- pantallas interactivas básicas
+- entornos controlados
