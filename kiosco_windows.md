@@ -20,6 +20,7 @@ Configuración completa de un tótem usando:
 
 # 1. Crear usuario kiosco
 
+- Configuración > Cuentas > Familia y otros usuarios y selecciona "Agregar otra persona a este equipo"
 - Usuario: `totem1`
 - Tipo: usuario estándar (NO administrador)
 
