@@ -1,4 +1,4 @@
-# 🖥️ Kiosco en Windows 10 con Google Chrome (sin Assigned Access)
+# 🖥️ Modo Kiosco en Windows 10 con Google Chrome (sin Assigned Access)
 
 Configuración completa de un tótem usando:
 - Auto-login
@@ -27,7 +27,7 @@ Configuración completa de un tótem usando:
 
 # 2. Configurar auto-login
 
-Ejecutar:
+-Ejecutar:
 
 Win + R → netplwiz
 
@@ -60,17 +60,21 @@ DevicePasswordLessBuildVersion = 0
 
 # 3. Crear carpeta de kiosco
 
+-Ingresar como `totem1`
+
+-Crear carpeta:
+
 C:\ProgramData\kiosk
 
 ---
 
 # 4. Script principal (Chrome en modo kiosco)
 
-Crear archivo:
+-Crear archivo:
 
 C:\ProgramData\kiosk\shell.bat
 
-Contenido:
+-Contenido:
 
 @echo off
 taskkill /IM chrome.exe /F >nul 2>&1
@@ -81,25 +85,31 @@ start "" "C:\Program Files\Google\Chrome\Application\chrome.exe" --kiosk https:/
 
 # 5. Reemplazar shell por el script
 
-Abrir regedit:
+Win + R, escribir `regedit`
 
-HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Winlogon
+Ir a: HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Winlogon
 
-Crear/modificar:
+-Clic derecho en un espacio vacío del panel derecho
+-Nuevo
+-Valor de cadena
+-Nombre exacto: Shell
 
-Shell = C:\ProgramData\kiosk\shell.bat
+-Doble clic sobre Shell
+-En “Información del valor” escribir:
+
+C:\ProgramData\kiosk\shell.bat
+
+-Luego aceptar
 
 ---
 
 # 6. Script de restricciones del sistema
 
-Crear archivo:
+-Crear archivo:
 
 C:\ProgramData\kiosk\setup_kiosk.bat
 
-Ejecutar como administrador
-
-Contenido:
+-Contenido:
 
 @echo off
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Explorer" /f
@@ -113,16 +123,12 @@ reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v Disa
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\EdgeUI" /v AllowEdgeSwipe /t REG_DWORD /d 0 /f
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v DisableWebSearch /t REG_DWORD /d 1 /f
 
----
 
-# 7. Aplicar restricciones al usuario correcto
-
-- Iniciar sesión como `totem1`
-- Ejecutar nuevamente el script si es necesario
+-Luego ejecutar como administrador
 
 ---
 
-# 8. Reiniciar sistema
+# 7. Reiniciar sistema
 
 shutdown /r /t 0
 
