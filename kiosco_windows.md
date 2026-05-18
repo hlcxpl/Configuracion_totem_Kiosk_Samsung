@@ -110,6 +110,16 @@ Contenido:
 ```bat
 @echo off
 
+REM =========================
+REM ASEGURAR ANYDESK
+REM =========================
+
+sc start AnyDesk >nul 2>&1
+
+REM =========================
+REM LOOP KIOSKO
+REM =========================
+
 :loop
 
 taskkill /IM chrome.exe /F >nul 2>&1
@@ -234,20 +244,65 @@ Contenido:
 ```bat
 @echo off
 
+REM =========================
+REM CREAR CLAVES NECESARIAS
+REM =========================
+
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /f
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System" /f
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\EdgeUI" /f
 reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /f
 
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoWinKeys /t REG_DWORD /d 1 /f
+REM =========================
+REM RESTRICCIONES BASICAS
+REM =========================
 
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v NoRun /t REG_DWORD /d 1 /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" ^
+/v NoWinKeys /t REG_DWORD /d 1 /f
 
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableTaskMgr /t REG_DWORD /d 1 /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" ^
+/v NoRun /t REG_DWORD /d 1 /f
 
-reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\EdgeUI" /v AllowEdgeSwipe /t REG_DWORD /d 0 /f
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System" ^
+/v DisableTaskMgr /t REG_DWORD /d 1 /f
 
-reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" /v DisableWebSearch /t REG_DWORD /d 1 /f
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\EdgeUI" ^
+/v AllowEdgeSwipe /t REG_DWORD /d 0 /f
+
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" ^
+/v DisableWebSearch /t REG_DWORD /d 1 /f
+
+REM =========================
+REM ANYDESK
+REM =========================
+
+sc config AnyDesk start= auto
+sc start AnyDesk
+
+REM =========================
+REM FIREWALL ANYDESK
+REM =========================
+
+netsh advfirewall firewall add rule ^
+name="AnyDesk TCP" ^
+dir=in action=allow ^
+protocol=TCP localport=7070
+
+REM =========================
+REM EVITAR SUSPENSION
+REM =========================
+
+powercfg /change standby-timeout-ac 0
+powercfg /change monitor-timeout-ac 0
+
+REM =========================
+REM FINAL
+REM =========================
+
+echo.
+echo Kiosko configurado correctamente.
+echo AnyDesk deberia permanecer accesible remotamente.
+pause
 ```
 
 Ejecutar:
