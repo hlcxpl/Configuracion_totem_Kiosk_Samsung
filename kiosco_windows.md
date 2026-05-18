@@ -90,11 +90,15 @@ Win + R, escribir `regedit`
 Ir a: HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Winlogon
 
 -Clic derecho en un espacio vacío del panel derecho
+
 -Nuevo
+
 -Valor de cadena
+
 -Nombre exacto: Shell
 
 -Doble clic sobre Shell
+
 -En “Información del valor” escribir:
 
 C:\ProgramData\kiosk\shell.bat
