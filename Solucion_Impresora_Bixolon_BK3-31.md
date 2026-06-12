@@ -65,7 +65,7 @@ if ($InfFiles) {
 }
 ```
 
-### Paso 1.3: Limpieza del Mapa de Registros de Hardware y Restablecimiento del Bus USB
+### Paso 1.3: Limpieza del Mapa de Registros de Hardware y Restablecimiento del Bus USB (Reiniciar despues de deste paso)
 
 ```powershell
 Remove-ItemProperty -Path "HKLM:\HARDWARE\DEVICEMAP\SERIALCOMM" -Name "\Device\BixolonVSerial0" -ErrorAction SilentlyContinue
@@ -85,21 +85,8 @@ foreach ($Device in $CypressDevices) {
 mode COM4: BAUD=9600 PARITY=N DATA=8 STOP=1
 ```
 
-## 4. Fase 3: Prueba de Impresión en Crudo (Sin Drivers)
 
-```powershell
-$port = New-Object System.IO.Ports.SerialPort COM4, 9600, None, 8, one
-$port.Open()
-
-$port.Write("====================================`r`n")
-$port.Write("   TEST DE IMPRESION DIRECTA COM4   `r`n")
-$port.Write("====================================`r`n")
-$port.Write("Kiosco Desbloqueado Exitosamente`r`n")
-
-$port.Close()
-```
-
-## 5. Fase 4: Reinstalación Limpia del Driver de Windows
+## 4. Fase 4: Reinstalación Limpia del Driver de Windows
 
 - Descargar Driver: Software POS Windows Driver V5.2.2
 - Evitar: BXLVCOM4USB
