@@ -164,10 +164,6 @@ Esto ayuda a evitar:
 
 NO modificar:
 
-```text
-HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon
-```
-
 sin comprender completamente el impacto.
 
 Modificar `HKLM` afecta TODOS los usuarios del sistema.
