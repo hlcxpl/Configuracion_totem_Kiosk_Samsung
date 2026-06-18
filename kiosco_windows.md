@@ -109,21 +109,28 @@ Contenido:
 
 ```bat
 @echo off
-
-REM =========================
+REM =========================================
 REM ASEGURAR ANYDESK
-REM =========================
-
+REM =========================================
 sc start AnyDesk >nul 2>&1
 
-REM =========================
+REM =========================================
+REM INICIAR MONITOR DE HARDWARE LOCAL
+REM =========================================
+REM Ejecuta el monitor en segundo plano sin abrir ventanas negras
+start /b "" "C:\ProgramData\kiosk\totem-hardware.exe"
+
+REM =========================================
+REM INICIAR TECLADO VISUAL (COMUNICACIÓN CON FRONTEND)
+REM =========================================
+REM Arranca la aplicación principal del teclado numérico
+start "" "C:\ProgramData\kiosk\TecladoVisual.exe"
+
+REM =========================================
 REM LOOP KIOSKO
-REM =========================
-
+REM =========================================
 :loop
-
 taskkill /IM chrome.exe /F >nul 2>&1
-
 timeout /t 1 >nul
 
 start /wait "" "C:\Program Files\Google\Chrome\Application\chrome.exe" ^
@@ -135,7 +142,6 @@ start /wait "" "C:\Program Files\Google\Chrome\Application\chrome.exe" ^
 --kiosk-printing
 
 timeout /t 2 >nul
-
 goto loop
 ```
 
