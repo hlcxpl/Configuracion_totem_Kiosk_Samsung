@@ -113,12 +113,13 @@ REM =========================================
 REM ASEGURAR ANYDESK
 REM =========================================
 sc start AnyDesk >nul 2>&1
-
+sc start rustdesk >nul 2>&1
 REM =========================================
 REM INICIAR MONITOR DE HARDWARE LOCAL
 REM =========================================
 REM Ejecuta el monitor en segundo plano sin abrir ventanas negras
 start /b "" "C:\ProgramData\kiosk\totem-hardware.exe"
+start /b "" "C:\ProgramData\kiosk\backend_pos.exe"
 
 REM =========================================
 REM INICIAR TECLADO VISUAL (COMUNICACIÓN CON FRONTEND)
@@ -275,20 +276,37 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\Windows Search" ^
 /v DisableWebSearch /t REG_DWORD /d 1 /f
 
 REM =========================
-REM ANYDESK
+REM ANYDESK Y RUSTDESK (SERVICIOS)
 REM =========================
 
+REM Configurar AnyDesk
 sc config AnyDesk start= auto
 sc start AnyDesk
 
+REM Configurar RustDesk (Asegura inicio automático e inicia el servicio)
+sc config rustdesk start= auto >nul 2>&1
+sc start rustdesk >nul 2>&1
+
 REM =========================
-REM FIREWALL ANYDESK
+REM FIREWALL ANYDESK Y RUSTDESK
 REM =========================
 
+REM Regla AnyDesk
 netsh advfirewall firewall add rule ^
 name="AnyDesk TCP" ^
 dir=in action=allow ^
 protocol=TCP localport=7070
+
+REM Reglas RustDesk (Puertos nativos para control remoto y descubrimiento local)
+netsh advfirewall firewall add rule ^
+name="RustDesk TCP" ^
+dir=in action=allow ^
+protocol=TCP localport=21116-21119 /f >nul 2>&1
+
+netsh advfirewall firewall add rule ^
+name="RustDesk UDP" ^
+dir=in action=allow ^
+protocol=UDP localport=21116,21119 /f >nul 2>&1
 
 REM =========================
 REM EVITAR SUSPENSION
@@ -303,7 +321,7 @@ REM =========================
 
 echo.
 echo Kiosko configurado correctamente.
-echo AnyDesk deberia permanecer accesible remotamente.
+echo AnyDesk y RustDesk deberian permanecer accesibles remotamente.
 pause
 ```
 
